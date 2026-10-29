@@ -1,0 +1,22 @@
+ĐƯA WEBAPP "XEM NGÀY TỐT XẤU" RA MÀN HÌNH ĐIỆN THOẠI
+
+BƯỚC 1 - ĐƯA LÊN MẠNG (chỉ làm một lần, miễn phí)
+Webapp cần một địa chỉ https. Cách nhanh nhất:
+  1. Vào https://app.netlify.com/drop (tạo tài khoản miễn phí nếu được hỏi).
+  2. Giải nén file zip này, kéo cả THƯ MỤC vừa giải nén thả vào khung "Drop".
+  3. Netlify trả về một đường link dạng https://ten-gi-do.netlify.app. Mở link đó trên điện thoại.
+(Có thể dùng GitHub Pages hoặc Cloudflare Pages thay cho Netlify.)
+
+BƯỚC 2 - CÀI LÊN MÀN HÌNH CHÍNH
+  iPhone (bắt buộc dùng Safari): bấm nút Chia sẻ -> "Thêm vào MH chính" -> Thêm.
+  Android (Chrome): bấm nút "Cài đặt" hiện trên trang, hoặc menu ⋮ -> "Cài đặt ứng dụng".
+Biểu tượng con dấu sẽ xuất hiện trên màn hình, mở ra toàn màn hình như app.
+
+DÙNG KHI MẤT MẠNG
+Lần đầu mở có mạng, app tự lưu toàn bộ dữ liệu. Sau đó mở không cần mạng.
+
+KHI SỬA FILE VÀ CẬP NHẬT BẢN MỚI
+  1. Sửa index.html hoặc các file .js.
+  2. Mở sw.js, đổi 'ngay-tot-xau-v1' thành 'ngay-tot-xau-v2' (rồi v3, v4...).
+  3. Kéo thả lại thư mục lên Netlify. Máy đã cài sẽ tự nhận bản mới ở lần mở tiếp theo.
+Thêm file dữ liệu .js mới: nhớ thêm tên file vào danh sách CORE trong sw.js.
