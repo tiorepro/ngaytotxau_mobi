@@ -1,0 +1,63 @@
+# Tạo PDF báo cáo cho Bot Telegram "Xem ngày giờ tốt"
+# Được Apps Script kích hoạt bằng sự kiện repository_dispatch (event_type: bot-pdf).
+# Dữ liệu yêu cầu đọc từ file sự kiện của runner (không in ra nhật ký), PDF không được lưu lại sau khi gửi.
+# Secrets cần có: TELEGRAM_TOKEN, TELEGRAM_OWNER_ID   (Settings → Secrets and variables → Actions)
+name: Bot - Tạo PDF
+
+on:
+  repository_dispatch:
+    types: [bot-pdf]
+
+concurrency:
+  group: bot-pdf
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  pdf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Lấy mã nguồn app
+        uses: actions/checkout@v4
+
+      - name: Cài Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: bot/pdf/requirements.txt
+
+      - name: Cài thư viện
+        run: pip install -r bot/pdf/requirements.txt
+
+      - name: Lưu đệm trình duyệt
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bot/pdf/requirements.txt') }}
+
+      - name: Cài Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Tạo PDF bằng chính app và gửi Telegram
+        id: pdf
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          OWNER_ID: ${{ secrets.TELEGRAM_OWNER_ID }}
+          REPO_ROOT: ${{ github.workspace }}
+        run: python bot/pdf/make_pdf.py --out out
+
+      - name: Báo lỗi nếu quy trình hỏng trước khi tạo được PDF
+        if: failure() && steps.pdf.outcome == 'skipped'
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          chat = json.load(open(os.environ['GITHUB_EVENT_PATH']))['client_payload']['chat_id']
+          data = urllib.parse.urlencode({'chat_id': chat, 'text': '❌ Quy trình tạo PDF gặp lỗi khi chuẩn bị. Vào GitHub → Actions để xem chi tiết, rồi nhắn "xuất pdf" lại.'}).encode()
+          urllib.request.urlopen(urllib.request.Request('https://api.telegram.org/bot' + os.environ['TELEGRAM_TOKEN'] + '/sendMessage', data=data))
+          PY
